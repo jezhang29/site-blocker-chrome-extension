@@ -5,10 +5,11 @@
   <link rel="stylesheet" href="popup.css">
 </head>
 <body>
-  <label class="toggle">
-    <input type="checkbox" id="enabled">
-    <span>Blocking on</span>
-  </label>
+  <div class="status-row">
+    <span id="status"></span>
+    <button id="pause"></button>
+  </div>
+  <button id="lock"></button>
 
   <h2>Blocked</h2>
   <form class="add-form" id="blocked-form">

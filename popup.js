@@ -1,6 +1,11 @@
 import { normalizeDomain, isBlocked } from "./domains.js";
 
-const enabledBox = document.getElementById("enabled");
+const PAUSE_MS = 5 * 60 * 1000;
+const LOCK_MS = 30 * 60 * 1000;
+
+const status = document.getElementById("status");
+const pauseButton = document.getElementById("pause");
+const lockButton = document.getElementById("lock");
 const blockCurrentButton = document.getElementById("block-current");
 const message = document.getElementById("message");
 
@@ -19,16 +24,50 @@ const ui = Object.fromEntries(
 
 async function load() {
   const {
-    enabled = true,
+    pausedUntil = 0,
+    lockedUntil = 0,
     blocked = [],
     allowed = [],
-  } = await chrome.storage.sync.get(["enabled", ...KEYS]);
-  return { enabled, blocked, allowed };
+  } = await chrome.storage.sync.get(["pausedUntil", "lockedUntil", ...KEYS]);
+  return { pausedUntil, lockedUntil, blocked, allowed };
+}
+
+// The popup is the only writer of these times; this copy drives the status line.
+const times = { pausedUntil: 0, lockedUntil: 0 };
+
+const isPaused = () => Date.now() < times.pausedUntil;
+const isLocked = () => Date.now() < times.lockedUntil;
+
+async function setTimes(changes) {
+  await chrome.storage.sync.set(changes);
+  Object.assign(times, changes);
+  renderStatus();
+}
+
+function clock(ms) {
+  return new Date(ms).toLocaleTimeString([], { hour: "numeric", minute: "2-digit" });
 }
 
 function showMessage(text) {
   message.textContent = text;
   message.hidden = !text;
+}
+
+// Returns true (and says so) when the lock forbids the action.
+function refuseIfLocked() {
+  if (!isLocked()) return false;
+  showMessage(`Locked until ${clock(times.lockedUntil)}.`);
+  return true;
+}
+
+function renderStatus() {
+  const paused = isPaused();
+  status.textContent = paused ? `Paused until ${clock(times.pausedUntil)}` : "Blocking on";
+  pauseButton.textContent = paused ? "Resume now" : "Pause 5 min";
+  lockButton.textContent = isLocked()
+    ? `Locked until ${clock(times.lockedUntil)}`
+    : "Lock for 30 min";
+  lockButton.disabled = isLocked();
 }
 
 function render(key, domains) {
@@ -50,6 +89,8 @@ function render(key, domains) {
 
 // Returns the new domain, or null if the input was not valid.
 async function addDomain(key, input) {
+  // A new allowed site would unblock it.
+  if (key === "allowed" && refuseIfLocked()) return null;
   const domain = normalizeDomain(input);
   if (!domain) {
     showMessage(`"${input}" is not a valid domain.`);
@@ -67,6 +108,7 @@ async function addDomain(key, input) {
 }
 
 async function removeDomain(key, domain) {
+  if (key === "blocked" && refuseIfLocked()) return;
   const { [key]: domains } = await load();
   const next = domains.filter((d) => d !== domain);
   await chrome.storage.sync.set({ [key]: next });
@@ -95,13 +137,28 @@ blockCurrentButton.addEventListener("click", async () => {
     return;
   }
   // The tab is already open, so no navigation event will close it. Close it here.
-  if (enabledBox.checked) await chrome.tabs.remove(tab.id);
+  if (!isPaused()) await chrome.tabs.remove(tab.id);
 });
 
-enabledBox.addEventListener("change", () => {
-  chrome.storage.sync.set({ enabled: enabledBox.checked });
+// The background worker reblocks and closes blocked tabs when the pause ends.
+pauseButton.addEventListener("click", async () => {
+  if (isPaused()) {
+    await setTimes({ pausedUntil: 0 });
+  } else if (!refuseIfLocked()) {
+    await setTimes({ pausedUntil: Date.now() + PAUSE_MS });
+  }
+});
+
+// Locking also ends a pause, so blocking is on for the whole lock.
+lockButton.addEventListener("click", async () => {
+  showMessage("");
+  await setTimes({ lockedUntil: Date.now() + LOCK_MS, pausedUntil: 0 });
 });
 
 const state = await load();
-enabledBox.checked = state.enabled;
+times.pausedUntil = state.pausedUntil;
+times.lockedUntil = state.lockedUntil;
+renderStatus();
+// Keeps the status and buttons right when a pause or lock ends while the popup is open.
+setInterval(renderStatus, 1000);
 for (const key of KEYS) render(key, state[key]);
