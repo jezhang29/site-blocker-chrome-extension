@@ -4,14 +4,59 @@ body {
   font: 13px system-ui, sans-serif;
 }
 
-.status-row {
+.switch {
   display: flex;
-  justify-content: space-between;
+  gap: 8px;
   align-items: center;
   font-weight: 600;
+  cursor: pointer;
 }
 
-#lock {
+/* The checkbox stays in the page for keyboard and screen readers; the track draws it. */
+.switch input {
+  position: absolute;
+  opacity: 0;
+}
+
+.track {
+  position: relative;
+  width: 32px;
+  height: 18px;
+  border-radius: 9px;
+  background: #bbb;
+  transition: background 0.15s;
+}
+
+.track::after {
+  content: "";
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: #fff;
+  transition: transform 0.15s;
+}
+
+.switch input:checked + .track {
+  background: #2e7d32;
+}
+
+.switch input:checked + .track::after {
+  transform: translateX(14px);
+}
+
+.switch input:focus-visible + .track {
+  outline: 2px solid #1a73e8;
+  outline-offset: 2px;
+}
+
+.switch input:disabled + .track {
+  opacity: 0.5;
+}
+
+#focus {
   width: 100%;
   margin-top: 6px;
 }

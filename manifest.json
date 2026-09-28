@@ -3,7 +3,7 @@
   "name": "Site Blocker",
   "version": "1.0.0",
   "description": "Closes any tab that navigates to a site on your block list.",
-  "permissions": ["alarms", "storage", "tabs", "webNavigation"],
+  "permissions": ["alarms", "notifications", "storage", "tabs", "webNavigation"],
   "background": {
     "service_worker": "background.js",
     "type": "module"
