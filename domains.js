@@ -15,9 +15,15 @@ export function normalizeDomain(input) {
   return host;
 }
 
-// A blocked domain also blocks its subdomains: "reddit.com" blocks "old.reddit.com",
+// A domain also covers its subdomains: "reddit.com" covers "old.reddit.com",
 // but not "notreddit.com".
-export function isBlocked(url, blockedDomains) {
+function covers(domain, host) {
+  return host === domain || host.endsWith(`.${domain}`);
+}
+
+// An allowed domain wins over a blocked one: with "youtube.com" blocked and
+// "music.youtube.com" allowed, only music.youtube.com stays open.
+export function isBlocked(url, blockedDomains, allowedDomains) {
   let parsed;
   try {
     parsed = new URL(url);
@@ -27,5 +33,7 @@ export function isBlocked(url, blockedDomains) {
   // Only websites; chrome://, file:// and similar pages also have hostnames.
   if (parsed.protocol !== "http:" && parsed.protocol !== "https:") return false;
   const host = parsed.hostname.toLowerCase();
-  return blockedDomains.some((d) => host === d || host.endsWith(`.${d}`));
+  return (
+    blockedDomains.some((d) => covers(d, host)) && !allowedDomains.some((d) => covers(d, host))
+  );
 }

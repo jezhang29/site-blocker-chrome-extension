@@ -12,12 +12,12 @@ body {
   margin-bottom: 10px;
 }
 
-#add-form {
+.add-form {
   display: flex;
   gap: 6px;
 }
 
-#domain {
+.add-form input {
   flex: 1;
   padding: 4px 6px;
 }
@@ -32,15 +32,15 @@ body {
   margin: 6px 0 0;
 }
 
-#list {
+.list {
   list-style: none;
   padding: 0;
   margin: 10px 0 0;
-  max-height: 300px;
+  max-height: 200px;
   overflow-y: auto;
 }
 
-#list li {
+.list li {
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -48,6 +48,16 @@ body {
   border-bottom: 1px solid #ddd;
 }
 
-#empty {
+h2 {
+  font-size: 13px;
+  margin: 14px 0 6px;
+}
+
+.hint,
+.empty {
   color: #666;
+}
+
+.hint {
+  margin: 0 0 6px;
 }

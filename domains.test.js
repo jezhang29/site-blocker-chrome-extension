@@ -18,15 +18,23 @@ test("normalizeDomain rejects input with no domain", () => {
 
 test("isBlocked matches the domain and its subdomains only", () => {
   const list = ["reddit.com", "youtube.com"];
-  assert.equal(isBlocked("https://reddit.com/", list), true);
-  assert.equal(isBlocked("https://old.reddit.com/r/all", list), true);
-  assert.equal(isBlocked("https://www.youtube.com/watch?v=1", list), true);
-  assert.equal(isBlocked("https://notreddit.com/", list), false);
-  assert.equal(isBlocked("https://example.com/?q=reddit.com", list), false);
+  assert.equal(isBlocked("https://reddit.com/", list, []), true);
+  assert.equal(isBlocked("https://old.reddit.com/r/all", list, []), true);
+  assert.equal(isBlocked("https://www.youtube.com/watch?v=1", list, []), true);
+  assert.equal(isBlocked("https://notreddit.com/", list, []), false);
+  assert.equal(isBlocked("https://example.com/?q=reddit.com", list, []), false);
 });
 
 test("isBlocked ignores non-web and invalid URLs", () => {
-  assert.equal(isBlocked("chrome://newtab/", ["newtab"]), false);
-  assert.equal(isBlocked("about:blank", ["reddit.com"]), false);
-  assert.equal(isBlocked("not a url", ["reddit.com"]), false);
+  assert.equal(isBlocked("chrome://newtab/", ["newtab"], []), false);
+  assert.equal(isBlocked("about:blank", ["reddit.com"], []), false);
+  assert.equal(isBlocked("not a url", ["reddit.com"], []), false);
+});
+
+test("isBlocked lets an allowed subdomain through a blocked domain", () => {
+  const blocked = ["youtube.com"];
+  const allowed = ["music.youtube.com"];
+  assert.equal(isBlocked("https://music.youtube.com/watch?v=1", blocked, allowed), false);
+  assert.equal(isBlocked("https://www.youtube.com/watch?v=1", blocked, allowed), true);
+  assert.equal(isBlocked("https://youtube.com/", blocked, allowed), true);
 });

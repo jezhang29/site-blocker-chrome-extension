@@ -10,15 +10,26 @@
     <span>Blocking on</span>
   </label>
 
-  <form id="add-form">
-    <input type="text" id="domain" placeholder="example.com" autocomplete="off">
-    <button type="submit">Add</button>
+  <h2>Blocked</h2>
+  <form class="add-form" id="blocked-form">
+    <input type="text" placeholder="example.com" autocomplete="off">
+    <button type="submit">Block</button>
   </form>
   <button id="block-current">Block current site</button>
   <p id="message" hidden></p>
 
-  <ul id="list"></ul>
-  <p id="empty">No sites blocked.</p>
+  <ul class="list" id="blocked-list"></ul>
+  <p class="empty" id="blocked-empty">No sites blocked.</p>
+
+  <h2>Allowed</h2>
+  <p class="hint">Stays open even when its parent domain is blocked.</p>
+  <form class="add-form" id="allowed-form">
+    <input type="text" placeholder="music.youtube.com" autocomplete="off">
+    <button type="submit">Allow</button>
+  </form>
+
+  <ul class="list" id="allowed-list"></ul>
+  <p class="empty" id="allowed-empty">No sites allowed.</p>
 
   <script type="module" src="popup.js"></script>
 </body>

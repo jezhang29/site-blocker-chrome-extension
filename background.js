@@ -4,8 +4,12 @@ import { isBlocked } from "./domains.js";
 // navigation because Chrome can stop the worker at any time and drop in-memory state.
 async function closeIfBlocked(details) {
   if (details.frameId !== 0) return; // top-level page only, not iframes
-  const { enabled = true, blocked = [] } = await chrome.storage.sync.get(["enabled", "blocked"]);
-  if (!enabled || !isBlocked(details.url, blocked)) return;
+  const {
+    enabled = true,
+    blocked = [],
+    allowed = [],
+  } = await chrome.storage.sync.get(["enabled", "blocked", "allowed"]);
+  if (!enabled || !isBlocked(details.url, blocked, allowed)) return;
   try {
     await chrome.tabs.remove(details.tabId);
   } catch (err) {
