@@ -1,16 +1,20 @@
 <!doctype html>
-<html>
+<html lang="en">
 <head>
   <meta charset="utf-8">
+  <title>Site Blocker</title>
   <link rel="stylesheet" href="popup.css">
 </head>
 <body>
-  <label class="switch">
-    <input type="checkbox" id="enabled">
-    <span class="track"></span>
-    <span>Blocking on</span>
-  </label>
-  <button id="focus"></button>
+  <header>
+    <h1><img src="icon.png" alt="">Site Blocker</h1>
+    <label class="switch">
+      <input type="checkbox" id="enabled">
+      <span class="track"></span>
+      <span>Blocking on</span>
+    </label>
+  </header>
+  <button id="focus" class="primary"></button>
 
   <h2>Blocked</h2>
   <form class="add-form" id="blocked-form">
