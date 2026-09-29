@@ -3,6 +3,9 @@
   "name": "Site Blocker",
   "version": "1.0.0",
   "description": "Closes any tab that navigates to a site on your block list.",
+  "icons": {
+    "128": "icon.png"
+  },
   "permissions": ["alarms", "notifications", "storage", "tabs", "webNavigation"],
   "background": {
     "service_worker": "background.js",
@@ -10,6 +13,7 @@
   },
   "action": {
     "default_title": "Site Blocker",
+    "default_icon": "icon.png",
     "default_popup": "popup.html"
   }
 }
